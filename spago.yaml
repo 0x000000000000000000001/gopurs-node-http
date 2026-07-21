@@ -1,0 +1,21 @@
+package:
+  name: node-http
+  dependencies:
+    - arraybuffer-types
+    - contravariant
+    - effect
+    - foreign
+    - foreign-object
+    - maybe
+    - node-buffer
+    - node-net
+    - node-streams
+    - node-tls
+    - node-url
+    - nullable
+    - options
+    - prelude
+    - unsafe-coerce
+workspace:
+  package_set:
+    registry: 46.0.0
