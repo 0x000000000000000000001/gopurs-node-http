@@ -1,0 +1,10 @@
+=== Building project with spago ===
+Reading Spago workspace configuration...
+
+✘ Couldn't parse Spago config file at: "/Users/0x1/Documents/htdocs/gopurs-node-http/spago.yaml"
+  YAML: [{"name":"YAMLParseError","code":"DUPLICATE_KEY","message":"Map keys must be unique at line 27, column 1:\n\n\nworkspace:\n^\n","pos":[402,403],"linePos":[{"line":27,"col":1},{"line":27,"col":2}]}]
+
+
+The configuration file help can be found here https://github.com/purescript/spago#the-configuration-file
+
+Spago build failed
