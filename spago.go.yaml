@@ -62,8 +62,12 @@ workspace:
       path: "../gopurs-js-promise-aff"
     js-uri:
       path: "../gopurs-js-uri"
+    js-date:
+      path: "../gopurs-js-date"
     lazy:
       path: "../gopurs-lazy"
+    node-buffer:
+      path: "../gopurs-node-buffer"
     node-event-emitter:
       path: "../gopurs-node-event-emitter"
     node-fs:

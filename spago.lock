@@ -725,6 +725,9 @@
       "integers": {
         "path": "../gopurs-integers"
       },
+      "js-date": {
+        "path": "../gopurs-js-date"
+      },
       "js-promise": {
         "path": "../gopurs-js-promise"
       },
@@ -736,6 +739,9 @@
       },
       "lazy": {
         "path": "../gopurs-lazy"
+      },
+      "node-buffer": {
+        "path": "../gopurs-node-buffer"
       },
       "node-event-emitter": {
         "path": "../gopurs-node-event-emitter"
@@ -1134,18 +1140,13 @@
       ]
     },
     "js-date": {
-      "type": "registry",
-      "version": "8.0.0",
-      "integrity": "sha256-DNQrp4xYc8o80jtxo0aOkUeXGi6h0Xidkk2ZQ8Y4l5Y=",
+      "type": "local",
+      "path": "../gopurs-js-date",
       "dependencies": [
         "datetime",
         "effect",
-        "enums",
         "foreign",
-        "functions",
-        "integers",
-        "maybe",
-        "prelude"
+        "integers"
       ]
     },
     "lazy": {
@@ -1197,17 +1198,13 @@
       ]
     },
     "node-buffer": {
-      "type": "registry",
-      "version": "9.0.0",
-      "integrity": "sha256-RdQjilmEHqsT4fwpCr8Mavw8KTafYrS3ZM6zeAAVAl8=",
+      "type": "local",
+      "path": "../gopurs-node-buffer",
       "dependencies": [
         "arraybuffer-types",
         "effect",
-        "functions",
         "maybe",
         "nullable",
-        "partial",
-        "prelude",
         "st",
         "unsafe-coerce"
       ]
