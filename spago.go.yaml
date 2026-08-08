@@ -21,10 +21,6 @@ package:
     dependencies:
       - console
 workspace:
-  package_set:
-    registry: 46.0.0
-
-workspace:
   packageSet:
     registry: 77.7.0
   extraPackages:
