@@ -1,5 +1,25 @@
 package main
 
+import "net/http"
+
+type ServerResponse struct {
+	Writer http.ResponseWriter
+	done   chan struct{}
+	closed bool
+}
+
+func (s *ServerResponse) Write(p []byte) (n int, err error) {
+	return s.Writer.Write(p)
+}
+
+func (s *ServerResponse) Close() error {
+	if !s.closed {
+		s.closed = true
+		close(s.done)
+	}
+	return nil
+}
+
 func Req(arg0 interface{}) interface{} { return nil }
 func SendDateImpl(arg0 interface{}) interface{} { return nil }
 func SetSendDateImpl(arg0 interface{}, arg1 interface{}) interface{} { return nil }

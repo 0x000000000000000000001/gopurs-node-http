@@ -1,42 +1,115 @@
 package main
 
 import (
+    "net/http"
+    "strings"
+
+    Node_EventEmitter "gopurs/output/Node.EventEmitter"
     "gopurs/output/gopurs_runtime"
 )
 
-var GlobalStatusCodes = make(map[interface{}]int)
-var GlobalHeaders = make(map[interface{}]gopurs_runtime.Value)
+type HttpResponseGetter interface {
+	GetResponse() *http.Response
+}
+
+func getReqOrRes(arg0 interface{}) (*http.Request, *http.Response) {
+    emitter := gopurs_runtime.Unbox[*Node_EventEmitter.EventEmitter](arg0)
+    if req, ok := emitter.Any.(*http.Request); ok {
+        return req, nil
+    }
+    if res, ok := emitter.Any.(*http.Response); ok {
+        return nil, res
+    }
+    if getter, ok := emitter.Any.(HttpResponseGetter); ok {
+        return nil, getter.GetResponse()
+    }
+    return nil, nil
+}
 
 func CompleteImpl(arg0 interface{}) interface{} { return true }
+
 func HeadersImpl(arg0 interface{}) interface{} {
-    var key interface{} = arg0
-    if val, ok := arg0.(gopurs_runtime.Value); ok && val.Type == gopurs_runtime.TypeAny {
-        key = val.AnyVal()
+    req, res := getReqOrRes(arg0)
+    var header http.Header
+    if req != nil {
+        header = req.Header
+    } else if res != nil {
+        header = res.Header
     }
-    if val, ok := GlobalHeaders[key]; ok {
-        return val
+    
+    headersMap := make(map[string]gopurs_runtime.Value)
+    if header != nil {
+        for k, v := range header {
+            if len(v) > 0 {
+                lowerK := strings.ToLower(k)
+                if lowerK == "set-cookie" {
+                    arr := make([]gopurs_runtime.Value, len(v))
+                    for i, s := range v {
+                        arr[i] = gopurs_runtime.Box(s)
+                    }
+                    headersMap[lowerK] = gopurs_runtime.Box(arr)
+                } else {
+                    headersMap[lowerK] = gopurs_runtime.Box(v[0])
+                }
+            }
+        }
     }
-    return gopurs_runtime.Box(map[string]interface{}{})
+    return gopurs_runtime.Box(headersMap)
 }
-func HeadersDistinct(arg0 interface{}) interface{} { return gopurs_runtime.Box(map[string]interface{}{}) }
-func HttpVersion(arg0 interface{}) interface{} { return "1.1" }
-func Method(arg0 interface{}) interface{} { return "GET" }
+
+func HeadersDistinct(arg0 interface{}) interface{} { return HeadersImpl(arg0) }
+
+func HttpVersion(arg0 interface{}) interface{} {
+    req, res := getReqOrRes(arg0)
+    if req != nil {
+        return strings.TrimPrefix(req.Proto, "HTTP/")
+    } else if res != nil {
+        return strings.TrimPrefix(res.Proto, "HTTP/")
+    }
+    return "1.1"
+}
+
+func Method(arg0 interface{}) interface{} {
+    req, _ := getReqOrRes(arg0)
+    if req != nil {
+        return req.Method
+    }
+    return ""
+}
+
 func RawHeaders(arg0 interface{}) interface{} { return nil }
 func RawTrailersImpl(arg0 interface{}) interface{} { return nil }
-func SocketImpl(arg0 interface{}) interface{} { 
-    return gopurs_runtime.Box(arg0) // return socket mock
+func SocketImpl(arg0 interface{}) interface{} {
+    emitter := gopurs_runtime.Unbox[*Node_EventEmitter.EventEmitter](arg0)
+    return gopurs_runtime.Box(emitter) // Return the emitter itself as a dummy socket if none available
 }
+
 func StatusCode(arg0 interface{}) interface{} {
-    var key interface{} = arg0
-    if val, ok := arg0.(gopurs_runtime.Value); ok && val.Type == gopurs_runtime.TypeAny {
-        key = val.AnyVal()
+    _, res := getReqOrRes(arg0)
+    if res != nil {
+        return int64(res.StatusCode)
     }
-    if val, ok := GlobalStatusCodes[key]; ok {
-        return val
-    }
-    return 200
+    return int64(200)
 }
-func StatusMessage(arg0 interface{}) interface{} { return "OK" }
+
+func StatusMessage(arg0 interface{}) interface{} {
+    _, res := getReqOrRes(arg0)
+    if res != nil {
+        return strings.TrimPrefix(res.Status, "200 ")
+    }
+    return "OK"
+}
+
 func TrailersImpl(arg0 interface{}) interface{} { return gopurs_runtime.Box(map[string]interface{}{}) }
 func TrailersDistinctImpl(arg0 interface{}) interface{} { return gopurs_runtime.Box(map[string]interface{}{}) }
-func Url(arg0 interface{}) interface{} { return "/" }
+
+func Url(arg0 interface{}) interface{} {
+    req, _ := getReqOrRes(arg0)
+    if req != nil {
+        if req.RequestURI != "" {
+            return req.RequestURI
+        }
+        return req.URL.String()
+    }
+    return ""
+}
