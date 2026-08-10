@@ -221,7 +221,7 @@ func performClientRequestHTTPS(optsMap map[string]gopurs_runtime.Value) interfac
 	go func() {
 		req, err := http.NewRequest(method, urlStr, pr)
 		if err != nil {
-			Node_EventEmitter.GopursUnsafeEmitFn1(gopurs_runtime.Box(reqEmitter), "error", gopurs_runtime.Box(err))
+			Node_EventEmitter.GopursUnsafeEmitFn2(gopurs_runtime.Box(reqEmitter), "error", gopurs_runtime.Box(err), nil)
 			return
 		}
 		for k, v := range headers {
@@ -230,7 +230,7 @@ func performClientRequestHTTPS(optsMap map[string]gopurs_runtime.Value) interfac
 		
 		res, err := client.Do(req)
 		if err != nil {
-			Node_EventEmitter.GopursUnsafeEmitFn1(gopurs_runtime.Box(reqEmitter), "error", gopurs_runtime.Box(err))
+			Node_EventEmitter.GopursUnsafeEmitFn2(gopurs_runtime.Box(reqEmitter), "error", gopurs_runtime.Box(err), nil)
 			return
 		}
 		
