@@ -27,13 +27,13 @@ func (l *EventEmitterListenerHTTPS) Accept() (net.Conn, error) {
 func (l *EventEmitterListenerHTTPS) Close() error { return nil }
 func (l *EventEmitterListenerHTTPS) Addr() net.Addr { return l.addr }
 
-func createSecureServerInternal(serverEmitter *Node_EventEmitter_EventEmitter, optsMap map[string]gopurs_runtime.Value) {
+func createSecureServerInternal(serverEmitter *EventEmitter, optsMap map[string]gopurs_runtime.Value) {
 	el := &EventEmitterListenerHTTPS{
 		conns: make(chan net.Conn, 1024),
 	}
 
 	Node_EventEmitter_GopursUnsafeOn(gopurs_runtime.Box(serverEmitter), "connection", gopurs_runtime.Func(func(sockVal gopurs_runtime.Value) gopurs_runtime.Value {
-		socket := gopurs_runtime.Unbox[*Node_EventEmitter_EventEmitter](sockVal)
+		socket := gopurs_runtime.Unbox[*EventEmitter](sockVal)
 		if conn, ok := socket.Any.(net.Conn); ok {
 			el.conns <- conn
 			socket.Any = nil // Steal socket
@@ -55,10 +55,10 @@ func createSecureServerInternal(serverEmitter *Node_EventEmitter_EventEmitter, o
 					return
 				}
 				
-				reqEmitter := Node_EventEmitter_NewImpl(nil).(*Node_EventEmitter_EventEmitter)
+				reqEmitter := Node_EventEmitter_NewImpl(nil).(*EventEmitter)
 				reqEmitter.Any = r
 
-				socketEmitter := Node_EventEmitter_NewImpl(nil).(*Node_EventEmitter_EventEmitter)
+				socketEmitter := Node_EventEmitter_NewImpl(nil).(*EventEmitter)
 				socketEmitter.Any = conn
 
 				var buf []byte
@@ -72,10 +72,10 @@ func createSecureServerInternal(serverEmitter *Node_EventEmitter_EventEmitter, o
 				Node_EventEmitter_GopursUnsafeEmitFn4(gopurs_runtime.Box(serverEmitter), "upgrade", gopurs_runtime.Box(reqEmitter), gopurs_runtime.Box(socketEmitter), gopurs_runtime.Box(buf), nil)
 				return
 			}
-			reqEmitter := Node_EventEmitter_NewImpl(nil).(*Node_EventEmitter_EventEmitter)
+			reqEmitter := Node_EventEmitter_NewImpl(nil).(*EventEmitter)
 			reqEmitter.Any = r
 
-			resEmitter := Node_EventEmitter_NewImpl(nil).(*Node_EventEmitter_EventEmitter)
+			resEmitter := Node_EventEmitter_NewImpl(nil).(*EventEmitter)
 			resEmitter.Any = w
 
 			done := make(chan bool, 1)
@@ -132,13 +132,13 @@ func createSecureServerInternal(serverEmitter *Node_EventEmitter_EventEmitter, o
 }
 
 func CreateSecureServer() interface{} {
-	serverEmitter := Node_EventEmitter_NewImpl(nil).(*Node_EventEmitter_EventEmitter)
+	serverEmitter := Node_EventEmitter_NewImpl(nil).(*EventEmitter)
 	createSecureServerInternal(serverEmitter, make(map[string]gopurs_runtime.Value))
 	return serverEmitter
 }
 
 func CreateSecureServerOptsImpl(arg0 interface{}) interface{} {
-	serverEmitter := Node_EventEmitter_NewImpl(nil).(*Node_EventEmitter_EventEmitter)
+	serverEmitter := Node_EventEmitter_NewImpl(nil).(*EventEmitter)
 	optsVal := arg0.(gopurs_runtime.Value)
 	optsMap := gopurs_runtime.RecordToMap(optsVal)
 	createSecureServerInternal(serverEmitter, optsMap)
@@ -213,7 +213,7 @@ func performClientRequestHTTPS(optsMap map[string]gopurs_runtime.Value) interfac
 		}
 	}
 	
-	reqEmitter := Node_EventEmitter_NewImpl(nil).(*Node_EventEmitter_EventEmitter)
+	reqEmitter := Node_EventEmitter_NewImpl(nil).(*EventEmitter)
 	pr, pw := io.Pipe()
 	reqEmitter.Any = pw
 	
@@ -234,10 +234,10 @@ func performClientRequestHTTPS(optsMap map[string]gopurs_runtime.Value) interfac
 		}
 		
 		if res.StatusCode == 101 && res.Header.Get("Upgrade") != "" {
-			resEmitter := Node_EventEmitter_NewImpl(nil).(*Node_EventEmitter_EventEmitter)
+			resEmitter := Node_EventEmitter_NewImpl(nil).(*EventEmitter)
 			resEmitter.Any = &ResponseWrapperHTTPS{Response: res, ReadCloser: res.Body}
 			
-			socketEmitter := Node_EventEmitter_NewImpl(nil).(*Node_EventEmitter_EventEmitter)
+			socketEmitter := Node_EventEmitter_NewImpl(nil).(*EventEmitter)
 			if rwc, ok := res.Body.(io.ReadWriteCloser); ok {
 				socketEmitter.Any = rwc
 			}
@@ -247,7 +247,7 @@ func performClientRequestHTTPS(optsMap map[string]gopurs_runtime.Value) interfac
 			return
 		}
 
-		resEmitter := Node_EventEmitter_NewImpl(nil).(*Node_EventEmitter_EventEmitter)
+		resEmitter := Node_EventEmitter_NewImpl(nil).(*EventEmitter)
 		resEmitter.Any = &ResponseWrapperHTTPS{Response: res, ReadCloser: res.Body}
 		
 		Node_EventEmitter_GopursUnsafeEmitFn2(gopurs_runtime.Box(reqEmitter), "response", gopurs_runtime.Box(resEmitter), nil)
@@ -278,7 +278,7 @@ func GetStrImpl(arg0 interface{}) interface{} {
 	optsMap["method"] = gopurs_runtime.Box("GET")
 	
 	reqEmitter := performClientRequestHTTPS(optsMap)
-	if pw, ok := reqEmitter.(*Node_EventEmitter_EventEmitter).Any.(*io.PipeWriter); ok {
+	if pw, ok := reqEmitter.(*EventEmitter).Any.(*io.PipeWriter); ok {
 		pw.Close()
 	}
 	return reqEmitter
@@ -289,7 +289,7 @@ func GetUrlImpl(arg0 interface{}) interface{} { return GetStrImpl(arg0) }
 func GetUrlOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return GetStrImpl(arg0) }
 func GetOptsImpl(arg0 interface{}) interface{} {
 	reqEmitter := performClientRequestHTTPS(gopurs_runtime.RecordToMap(arg0.(gopurs_runtime.Value)))
-	if pw, ok := reqEmitter.(*Node_EventEmitter_EventEmitter).Any.(*io.PipeWriter); ok {
+	if pw, ok := reqEmitter.(*EventEmitter).Any.(*io.PipeWriter); ok {
 		pw.Close()
 	}
 	return reqEmitter
