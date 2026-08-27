@@ -56,7 +56,7 @@ func HeadersImpl(arg0 interface{}) interface{} {
     return gopurs_runtime.Box(headersMap)
 }
 
-func HeadersDistinct(arg0 interface{}) interface{} { return HeadersImpl(arg0) }
+func HeadersDistinct(arg0 interface{}) interface{} { return Node_HTTP_IncomingMessage_HeadersImpl(arg0) }
 
 func HttpVersion(arg0 interface{}) interface{} {
     req, res := getReqOrRes(arg0)

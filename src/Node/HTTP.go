@@ -94,7 +94,7 @@ func CreateServer() interface{} {
 }
 
 func CreateServerOptsImpl(arg0 interface{}) interface{} {
-	return CreateServer()
+	return Node_HTTP_CreateServer()
 }
 
 // Wrapper for Response + Reader
@@ -225,9 +225,9 @@ func GetStrImpl(arg0 interface{}) interface{} {
 	return reqEmitter
 }
 
-func GetStrOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return GetStrImpl(arg0) }
-func GetUrlImpl(arg0 interface{}) interface{} { return GetStrImpl(arg0) }
-func GetUrlOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return GetStrImpl(arg0) }
+func GetStrOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return Node_HTTP_GetStrImpl(arg0) }
+func GetUrlImpl(arg0 interface{}) interface{} { return Node_HTTP_GetStrImpl(arg0) }
+func GetUrlOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return Node_HTTP_GetStrImpl(arg0) }
 func GetOptsImpl(arg0 interface{}) interface{} {
 	reqEmitter := performClientRequest(gopurs_runtime.RecordToMap(arg0.(gopurs_runtime.Value)))
 	if pw, ok := reqEmitter.(*EventEmitter).Any.(*io.PipeWriter); ok {

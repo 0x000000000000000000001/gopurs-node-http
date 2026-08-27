@@ -284,9 +284,9 @@ func GetStrImpl(arg0 interface{}) interface{} {
 	return reqEmitter
 }
 
-func GetStrOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return GetStrImpl(arg0) }
-func GetUrlImpl(arg0 interface{}) interface{} { return GetStrImpl(arg0) }
-func GetUrlOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return GetStrImpl(arg0) }
+func GetStrOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return Node_HTTPS_GetStrImpl(arg0) }
+func GetUrlImpl(arg0 interface{}) interface{} { return Node_HTTPS_GetStrImpl(arg0) }
+func GetUrlOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return Node_HTTPS_GetStrImpl(arg0) }
 func GetOptsImpl(arg0 interface{}) interface{} {
 	reqEmitter := performClientRequestHTTPS(gopurs_runtime.RecordToMap(arg0.(gopurs_runtime.Value)))
 	if pw, ok := reqEmitter.(*EventEmitter).Any.(*io.PipeWriter); ok {
@@ -295,7 +295,7 @@ func GetOptsImpl(arg0 interface{}) interface{} {
 	return reqEmitter
 }
 
-func RequestStrImpl(arg0 interface{}) interface{} { return GetStrImpl(arg0) }
-func RequestStrOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return GetStrImpl(arg0) }
-func RequestUrlImpl(arg0 interface{}) interface{} { return GetStrImpl(arg0) }
-func RequestUrlOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return GetStrImpl(arg0) }
+func RequestStrImpl(arg0 interface{}) interface{} { return Node_HTTPS_GetStrImpl(arg0) }
+func RequestStrOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return Node_HTTPS_GetStrImpl(arg0) }
+func RequestUrlImpl(arg0 interface{}) interface{} { return Node_HTTPS_GetStrImpl(arg0) }
+func RequestUrlOptsImpl(arg0 interface{}, arg1 interface{}) interface{} { return Node_HTTPS_GetStrImpl(arg0) }
