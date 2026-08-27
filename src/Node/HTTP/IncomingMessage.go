@@ -4,7 +4,6 @@ import (
     "net/http"
     "strings"
 
-    Node_EventEmitter "gopurs/output/Node.EventEmitter"
     "gopurs/output/gopurs_runtime"
 )
 
@@ -13,7 +12,7 @@ type HttpResponseGetter interface {
 }
 
 func getReqOrRes(arg0 interface{}) (*http.Request, *http.Response) {
-    emitter := gopurs_runtime.Unbox[*Node_EventEmitter.EventEmitter](arg0)
+    emitter := gopurs_runtime.Unbox[*Node_EventEmitter_EventEmitter](arg0)
     if req, ok := emitter.Any.(*http.Request); ok {
         return req, nil
     }
@@ -80,7 +79,7 @@ func Method(arg0 interface{}) interface{} {
 func RawHeaders(arg0 interface{}) interface{} { return nil }
 func RawTrailersImpl(arg0 interface{}) interface{} { return nil }
 func SocketImpl(arg0 interface{}) interface{} {
-    emitter := gopurs_runtime.Unbox[*Node_EventEmitter.EventEmitter](arg0)
+    emitter := gopurs_runtime.Unbox[*Node_EventEmitter_EventEmitter](arg0)
     return gopurs_runtime.Box(emitter) // Return the emitter itself as a dummy socket if none available
 }
 
