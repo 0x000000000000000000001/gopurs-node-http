@@ -26,16 +26,10 @@ workspace:
   extraPackages:
     aff:
       path: "../gopurs-aff"
-    argonaut-core:
-      path: "../gopurs-argonaut-core"
     arrays:
       path: "../gopurs-arrays"
     assert:
       path: "../gopurs-assert"
-    avar:
-      path: "../gopurs-avar"
-    catenable-lists:
-      path: "../gopurs-catenable-lists"
     console:
       path: "../gopurs-console"
     datetime:
@@ -56,12 +50,6 @@ workspace:
       path: "../gopurs-functions"
     integers:
       path: "../gopurs-integers"
-    js-promise:
-      path: "../gopurs-js-promise"
-    js-promise-aff:
-      path: "../gopurs-js-promise-aff"
-    js-uri:
-      path: "../gopurs-js-uri"
     js-date:
       path: "../gopurs-js-date"
     lazy:
@@ -76,12 +64,8 @@ workspace:
       path: "../gopurs-node-net"
     node-path:
       path: "../gopurs-node-path"
-    node-process:
-      path: "../gopurs-node-process"
     node-streams:
       path: "../gopurs-node-streams"
-    now:
-      path: "../gopurs-now"
     nullable:
       path: "../gopurs-nullable"
     numbers:
@@ -90,31 +74,13 @@ workspace:
       path: "../gopurs-partial"
     prelude:
       path: "../gopurs-prelude"
-    random:
-      path: "../gopurs-random"
-    record:
-      path: "../gopurs-record"
     refs:
       path: "../gopurs-refs"
-    run:
-      path: "../gopurs-run"
-    simple-json:
-      path: "../gopurs-simple-json"
-    spec:
-      path: "../gopurs-spec"
     st:
       path: "../gopurs-st"
     strings:
       path: "../gopurs-strings"
-    test:
-      path: "../gopurs-test"
     unfoldable:
       path: "../gopurs-unfoldable"
     unsafe-coerce:
       path: "../gopurs-unsafe-coerce"
-    uuid:
-      path: "../gopurs-uuid"
-    variant:
-      path: "../gopurs-variant"
-    yoga-json:
-      path: "../gopurs-yoga-json"
