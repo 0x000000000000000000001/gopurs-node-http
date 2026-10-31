@@ -2,6 +2,8 @@
 set -e
 cd "$(dirname "$0")/.."
 
+node test/https-response-native.mjs
+
 CLEAN=0
 for arg in "$@"; do
   if [ "$arg" == "-c" ] || [ "$arg" == "--clean" ]; then
@@ -36,7 +38,7 @@ if [ -d "output/main" ]; then
     go build -o go_test_app ./main
     cd ..
     
-    GOGC=1000 ./output/go_test_app
+    GOGC=1000 node test/https-fixture.mjs ./output/go_test_app
 else
     echo "No output/main/main found."
     exit 1

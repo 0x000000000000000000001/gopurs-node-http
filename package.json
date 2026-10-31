@@ -3,7 +3,7 @@
   "scripts": {
     "clean": "rimraf output && rimraf .pulp-cache",
     "build": "eslint src && pulp build -- --censor-lib --strict",
-    "test": "pulp test -- --censor-lib"
+    "test": "pulp build -I test -- --censor-lib && node test/https-fixture.mjs node --input-type=module -e \"import { main } from './output/Test.Main/index.js'; main();\""
   },
   "devDependencies": {
     "eslint": "^7.15.0",

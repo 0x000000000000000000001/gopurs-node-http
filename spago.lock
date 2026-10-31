@@ -24,7 +24,9 @@
         },
         "test": {
           "dependencies": [
-            "console"
+            "console",
+            "node-process",
+            "refs"
           ]
         }
       }
@@ -737,6 +739,9 @@
       "node-path": {
         "path": "../gopurs-node-path"
       },
+      "node-process": {
+        "path": "../gopurs-node-process"
+      },
       "node-streams": {
         "path": "../gopurs-node-streams"
       },
@@ -1221,6 +1226,21 @@
         "prelude"
       ]
     },
+    "node-process": {
+      "type": "local",
+      "path": "../gopurs-node-process",
+      "dependencies": [
+        "effect",
+        "foreign",
+        "foreign-object",
+        "maybe",
+        "node-event-emitter",
+        "node-streams",
+        "posix-types",
+        "prelude",
+        "unsafe-coerce"
+      ]
+    },
     "node-streams": {
       "type": "local",
       "path": "../gopurs-node-streams",
@@ -1373,6 +1393,16 @@
       "type": "local",
       "path": "../gopurs-partial",
       "dependencies": []
+    },
+    "posix-types": {
+      "type": "registry",
+      "version": "6.0.0",
+      "integrity": "sha256-Je5jG439F/SFO/IvVevZnWVxDIonrehlKuJkefP2lHE=",
+      "dependencies": [
+        "maybe",
+        "newtype",
+        "prelude"
+      ]
     },
     "prelude": {
       "type": "local",

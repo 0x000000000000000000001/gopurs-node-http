@@ -20,6 +20,8 @@ package:
     main: Test.Main
     dependencies:
       - console
+      - node-process
+      - refs
 workspace:
   packageSet:
     registry: 77.7.0
@@ -64,6 +66,8 @@ workspace:
       path: "../gopurs-node-net"
     node-path:
       path: "../gopurs-node-path"
+    node-process:
+      path: "../gopurs-node-process"
     node-streams:
       path: "../gopurs-node-streams"
     nullable:
