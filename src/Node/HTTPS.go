@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 
 	"gopurs/output/gopurs_runtime"
 )
@@ -148,6 +149,57 @@ func CreateSecureServerOptsImpl(arg0 interface{}) interface{} {
 type ResponseWrapperHTTPS struct {
 	*http.Response
 	io.ReadCloser
+	emitter *EventEmitter
+	mu sync.Mutex
+	ready bool
+	started bool
+}
+
+// EventEmitter calls this after releasing its listener lock. Wait until the
+// response callback returns as well, so its synchronous listeners are installed
+// before a fast (or empty) response body can emit data/end.
+func (rw *ResponseWrapperHTTPS) OnListenerAdded(eventName string) {
+	if eventName == "data" {
+		rw.startReading()
+	}
+}
+
+func (rw *ResponseWrapperHTTPS) markResponseReady() {
+	rw.mu.Lock()
+	rw.ready = true
+	rw.mu.Unlock()
+	rw.startReading()
+}
+
+func (rw *ResponseWrapperHTTPS) startReading() {
+	rw.mu.Lock()
+	if !rw.ready || rw.started || rw.emitter == nil ||
+		Node_EventEmitter_ListenerCountImpl(gopurs_runtime.Box(rw.emitter), "data", nil).(int64) == 0 {
+		rw.mu.Unlock()
+		return
+	}
+	rw.started = true
+	rw.mu.Unlock()
+	go func() {
+		defer rw.Body.Close()
+		buffer := make([]byte, 32*1024)
+		for {
+			n, err := rw.Body.Read(buffer)
+			if n > 0 {
+				// Listeners may retain a chunk after the next read reuses buffer.
+				chunk := append([]byte(nil), buffer[:n]...)
+				Node_EventEmitter_GopursUnsafeEmitFn2(gopurs_runtime.Box(rw.emitter), "data", gopurs_runtime.Box(chunk), nil)
+			}
+			if err != nil {
+				if err == io.EOF {
+					Node_EventEmitter_GopursUnsafeEmitFn1(gopurs_runtime.Box(rw.emitter), "end", nil)
+				} else {
+					Node_EventEmitter_GopursUnsafeEmitFn2(gopurs_runtime.Box(rw.emitter), "error", gopurs_runtime.Box(err), nil)
+				}
+				return
+			}
+		}
+	}()
 }
 
 func (rw *ResponseWrapperHTTPS) GetResponse() *http.Response {
@@ -248,9 +300,11 @@ func performClientRequestHTTPS(optsMap map[string]gopurs_runtime.Value) interfac
 		}
 
 		resEmitter := Node_EventEmitter_NewImpl(nil).(*EventEmitter)
-		resEmitter.Any = &ResponseWrapperHTTPS{Response: res, ReadCloser: res.Body}
+		response := &ResponseWrapperHTTPS{Response: res, ReadCloser: res.Body, emitter: resEmitter}
+		resEmitter.Any = response
 		
 		Node_EventEmitter_GopursUnsafeEmitFn2(gopurs_runtime.Box(reqEmitter), "response", gopurs_runtime.Box(resEmitter), nil)
+		response.markResponseReady()
 	}()
 	
 	return reqEmitter

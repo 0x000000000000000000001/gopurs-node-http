@@ -12,7 +12,9 @@
     "url": "https://github.com/purescript-node/purescript-node-http.git"
   },
   "devDependencies": {
-    "purescript-console": "^6.0.0"
+    "purescript-console": "^6.0.0",
+    "purescript-node-process": "^11.2.0",
+    "purescript-refs": "^6.0.0"
   },
   "dependencies": {
     "purescript-arraybuffer-types": "^3.0.2",

@@ -4,16 +4,19 @@ import Prelude
 
 import Data.Either (Either(..))
 import Data.Foldable (foldMap, for_)
-import Data.Maybe (fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect (Effect)
-import Effect.Aff (launchAff_, makeAff, nonCanceler)
+import Effect.Aff (Aff, launchAff_, makeAff, nonCanceler, runAff_)
 import Effect.Class (liftEffect)
 import Effect.Console (log, logShow)
+import Effect.Console as Console
+import Effect.Exception (error, message)
+import Effect.Ref as Ref
 import Effect.Uncurried (EffectFn2)
 import Foreign.Object (lookup)
 import Node.Buffer as Buffer
 import Node.Encoding (Encoding(..))
-import Node.EventEmitter (once, once_)
+import Node.EventEmitter (on_, once, once_)
 import Node.HTTP as HTTP
 import Node.HTTP.ClientRequest as Client
 import Node.HTTP.IncomingMessage as IM
@@ -26,6 +29,7 @@ import Node.HTTPS as HTTPS
 import Node.Net.Server (listenTcp)
 import Node.Net.Server as NetServer
 import Node.Net.Socket as Socket
+import Node.Process as Process
 import Node.Stream (Writable, end, pipe)
 import Node.Stream as Stream
 import Partial.Unsafe (unsafeCrashWith)
@@ -40,8 +44,13 @@ main = do
   testBasic
   testUpgrade
   testHttpsServer
-  testHttps
-  testCookies
+  runAff_ (case _ of
+    Left err -> do
+      Console.error (message err)
+      Process.exit' 1
+    Right _ -> pure unit) do
+    testHttps
+    testCookies
 
 killServer :: forall transmissionType. HttpServer' transmissionType -> Effect Unit
 killServer s = do
@@ -172,21 +181,45 @@ testHttpsServer = do
     end (OM.toWriteable $ Client.toOutgoingMessage req)
   listenTcp netServer { host: "localhost", port: 8081 }
 
-testHttps :: Effect Unit
-testHttps = do
-  let uri = "https://pursuit.purescript.org/packages/purescript-node-http/badge"
-  log ("GET " <> uri <> ":")
-  req <- HTTPS.get uri
-  req # once_ Client.responseH logResponse
-  end (OM.toWriteable $ Client.toOutgoingMessage req)
+testHttps :: Aff Unit
+testHttps = testLocalHttps "local HTTPS" "/https?case=tls" Nothing "local HTTPS response\n"
 
-testCookies :: Effect Unit
-testCookies = do
-  let uri = "https://httpbin.org/cookies/set?cookie1=firstcookie&cookie2=secondcookie"
-  log ("GET " <> uri <> ":")
-  req <- HTTPS.get uri
-  req # once_ Client.responseH logResponse
-  end (OM.toWriteable $ Client.toOutgoingMessage req)
+testCookies :: Aff Unit
+testCookies = testLocalHttps "local cookies" "/cookies"
+  (Just [ "cookie1=firstcookie; Path=/", "cookie2=secondcookie; HttpOnly; Secure" ])
+  "local cookies response\n"
+
+-- The fixture wrapper supplies a loopback URL and a trusted test certificate.
+-- HTTPS.get keeps its default certificate verification enabled.
+testLocalHttps :: String -> String -> Maybe (Array String) -> String -> Aff Unit
+testLocalHttps name path expectedCookies expectedBody = do
+  configured <- liftEffect $ Process.lookupEnv "GOPURS_TEST_HTTPS_BASE_URL"
+  let base = case configured of
+        Just value -> value
+        Nothing -> unsafeCrashWith "Run these tests through test/https-fixture.mjs"
+  makeAff \done -> do
+    req <- HTTPS.get (base <> path)
+    OM.toWriteable (Client.toOutgoingMessage req) # once_ Stream.errorH (done <<< Left)
+    req # once_ Client.responseH \response -> do
+      if IM.statusCode response /= 200 then
+        done $ Left $ error $ name <> ": unexpected status " <> show (IM.statusCode response)
+      else if IM.cookies response /= expectedCookies then
+        done $ Left $ error $ name <> ": unexpected Set-Cookie values " <> show (IM.cookies response)
+      else do
+        body <- Ref.new ""
+        let readable = IM.toReadable response
+        readable # once_ Stream.errorH (done <<< Left)
+        readable # once_ Stream.endH do
+          actual <- Ref.read body
+          if actual /= expectedBody then
+            done $ Left $ error $ name <> ": unexpected body " <> show actual
+          else do
+            log $ "PASS " <> name
+            done $ Right unit
+        readable # on_ Stream.dataH \chunk -> do
+          text <- Buffer.toString UTF8 chunk
+          Ref.modify_ (_ <> text) body
+    pure nonCanceler
 
 logResponse :: forall imTy. IncomingMessage imTy -> Effect Unit
 logResponse response = void do
