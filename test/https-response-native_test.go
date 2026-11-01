@@ -5,11 +5,20 @@ import (
 	"gopurs/output/gopurs_runtime"
 	"io"
 	"net/http"
+	"os"
 	"reflect"
 	"sync"
 	"testing"
 	"time"
 )
+
+func TestStdoutIsNativeWritableStream(t *testing.T) {
+	emitter := nodeEventEmitter_extractEventEmitter(gopurs_runtime.Box(Stdout))
+	writer, ok := emitter.Any.(io.Writer)
+	if !ok || writer != os.Stdout {
+		t.Fatalf("test stdout must carry os.Stdout as a native writer, got %T", emitter.Any)
+	}
+}
 
 type responseReadStep struct {
 	data string
