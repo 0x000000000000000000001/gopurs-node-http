@@ -16,6 +16,8 @@ try {
   mkdirSync(join(workspace, "gopurs_runtime"));
   copyFileSync(join(runtimeRoot, "runtime/runtime.go"), join(workspace, "gopurs_runtime/runtime.go"));
   copyFileSync(join(libraryRoot, "gopurs-node-event-emitter/src/Node/EventEmitter.go"), join(workspace, "emitter.go"));
+  const stdoutSource = readFileSync(fileURLToPath(new URL("./Main.go", import.meta.url)), "utf8");
+  writeFileSync(join(workspace, "stdout.go"), stdoutSource.replace(/^package Test_Main\b/, "package Node_EventEmitter"));
   // Compile the actual wrapper and emitter together; aliases only reproduce the
   // compiler's names for the three emitter functions referenced by this wrapper.
   writeFileSync(join(workspace, "response.go"), `package Node_EventEmitter
@@ -25,6 +27,7 @@ import (
   "sync"
   "gopurs/output/gopurs_runtime"
 )
+var Node_EventEmitter_NewImpl = NewImpl
 var Node_EventEmitter_ListenerCountImpl = ListenerCountImpl
 var Node_EventEmitter_GopursUnsafeEmitFn1 = GopursUnsafeEmitFn1
 var Node_EventEmitter_GopursUnsafeEmitFn2 = GopursUnsafeEmitFn2
